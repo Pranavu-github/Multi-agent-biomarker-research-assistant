@@ -1,0 +1,41 @@
+# ── Core LLM ──────────────────────────────────────────────────────────────────
+anthropic>=0.25.0
+groq>=0.5.0                    # optional fallback
+
+# ── Data / Science ────────────────────────────────────────────────────────────
+pandas>=2.0.0
+numpy>=1.24.0
+
+# ── RAG — FAISS + BM25 + MedCPT encoders ─────────────────────────────────────
+faiss-cpu>=1.7.4
+transformers>=4.40.0           # MedCPT-Query-Encoder + MedCPT-Article-Encoder
+sentence-transformers>=2.5.0   # fallback if MedCPT unavailable (all-MiniLM-L6-v2)
+rank-bm25>=0.2.2               # BM25 sparse retrieval
+# NOTE: torch is installed separately in Dockerfile (CPU-only build)
+# For local dev: pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# ── Text splitting ────────────────────────────────────────────────────────────
+langchain-text-splitters>=0.2.0
+
+# ── Biomedical retrieval ──────────────────────────────────────────────────────
+biopython>=1.83               # Entrez (PubMed / PMC)
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# ── FastAPI backend (async, runs inside app.py) ───────────────────────────────
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0        # ASGI server for FastAPI
+httpx>=0.27.0                    # async HTTP (used internally by FastAPI)
+pydantic>=2.0.0                  # request/response models
+
+# ── MCP server ────────────────────────────────────────────────────────────────
+fastmcp>=0.4.0
+
+# ── Streamlit UI ──────────────────────────────────────────────────────────────
+streamlit>=1.32.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+tqdm>=4.66.0
+loguru>=0.7.0

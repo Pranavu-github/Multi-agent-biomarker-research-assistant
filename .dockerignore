@@ -1,0 +1,30 @@
+# Exclude everything that doesn't need to be in the Docker image
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets — NEVER bake these into the image
+.env
+*.env
+
+# Git
+.git/
+.gitignore
+
+# Local dev / IDE
+.vscode/
+.idea/
+*.DS_Store
+
+# Test files
+tests/
+pytest_cache/

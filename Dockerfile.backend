@@ -1,0 +1,37 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install CPU-only PyTorch first (saves ~2 GB vs full CUDA version)
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Pre-download MedCPT models into the image at build time
+# This avoids slow cold starts — models are ~900 MB total
+# To skip (download at runtime instead), comment out this block
+ENV HF_HOME=/app/.cache/huggingface
+RUN python -c "\
+from transformers import AutoTokenizer, AutoModel; \
+AutoTokenizer.from_pretrained('ncbi/MedCPT-Query-Encoder'); \
+AutoModel.from_pretrained('ncbi/MedCPT-Query-Encoder'); \
+AutoTokenizer.from_pretrained('ncbi/MedCPT-Article-Encoder'); \
+AutoModel.from_pretrained('ncbi/MedCPT-Article-Encoder'); \
+print('MedCPT models ready.')"
+
+# Copy application code
+COPY . .
+
+# Create graph data directory (volume mount point for graph_store.pkl)
+RUN mkdir -p /app/graph_data
+
+EXPOSE 8001
+
+CMD ["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "8001"]
