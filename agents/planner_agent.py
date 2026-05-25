@@ -74,7 +74,7 @@ Return ONLY valid JSON — no preamble, no markdown:
 }}
 """
     try:
-        text = call_llm(prompt, max_tokens=400, temperature=0.1)
+        text = call_llm(prompt, max_tokens=400, temperature=0.1, use_fast=False)
         data = _safe_json_load(text)
         synonyms = data.get("synonyms", [])
         all_terms = [gene] + [s for s in synonyms if s.lower() != gene.lower()]
@@ -149,7 +149,7 @@ If no relevant subtypes or synonyms exist, return:
 }}
 """
     try:
-        text = call_llm(prompt, max_tokens=500, temperature=0.1)
+        text = call_llm(prompt, max_tokens=500, temperature=0.1, use_fast=False)
         data = _safe_json_load(text)
         subtypes = data.get("subtypes", [])
         # Deduplicate, preserve order, remove the query term itself if present
@@ -221,7 +221,7 @@ Return ONLY valid JSON — no preamble, no markdown:
 }}
 """
     try:
-        text = call_llm(prompt, max_tokens=400, temperature=0.1)
+        text = call_llm(prompt, max_tokens=400, temperature=0.1, use_fast=False)
         data = _safe_json_load(text)
         canonical = data.get("canonical_name", disease).strip()
         # Guard: if LLM returns empty canonical (rate-limited response, partial
@@ -284,7 +284,7 @@ def _generate_queries_llm(
         .replace("{synonyms}",      ", ".join(synonyms))
         .replace("{cell_subtypes}", subtypes_str)
     )
-    text    = call_llm(prompt, max_tokens=700, temperature=0.1)
+    text    = call_llm(prompt, max_tokens=700, temperature=0.1, use_fast=False)
     data    = _safe_json_load(text)
     queries = data.get("queries", [])
     if not isinstance(queries, list) or not queries:

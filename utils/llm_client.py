@@ -23,13 +23,16 @@ import time
 from loguru import logger
 
 
-# Groq free-tier model — llama-3.3-70b-versatile offers better quality
-# than the older llama3-70b-8192 at similar rate limits.
-_GROQ_MODEL = "llama-3.3-70b-versatile"
+# Groq model tiers:
+# - FAST: llama-3.1-8b-instant   → used for extraction (many calls, speed matters)
+# - QUALITY: llama-3.3-70b-versatile → used for planner + scoring (fewer calls, quality matters)
+_GROQ_MODEL_FAST    = "llama-3.1-8b-instant"
+_GROQ_MODEL_QUALITY = "llama-3.3-70b-versatile"
+_GROQ_MODEL         = _GROQ_MODEL_FAST   # default for most calls
 
 # Retry settings for Groq 429 / rate-limit responses
 _GROQ_MAX_RETRIES   = 3
-_GROQ_RETRY_BASE_S  = 4   # seconds — doubles each retry: 4s, 8s, 16s
+_GROQ_RETRY_BASE_S  = 2   # seconds — doubles each retry: 2s, 4s, 8s (reduced from 4s)
 
 
 def _is_rate_limit_error(exc: Exception) -> bool:
@@ -44,6 +47,7 @@ def call_llm(
     max_tokens:  int   = 1024,
     system:      str   = "",
     temperature: float = 1.0,
+    use_fast:    bool  = True,   # True = 8b-instant (fast), False = 70b (quality)
 ) -> str:
     """
     Call the configured LLM and return the response text.
@@ -91,6 +95,8 @@ def call_llm(
     if groq_key:
         from groq import Groq
         client = Groq(api_key=groq_key)
+        groq_model = _GROQ_MODEL_FAST if use_fast else _GROQ_MODEL_QUALITY
+        logger.info(f"[llm_client] Using Groq model: {groq_model}")
 
         messages = []
         if system:
@@ -102,7 +108,7 @@ def call_llm(
         for attempt in range(_GROQ_MAX_RETRIES):
             try:
                 response = client.chat.completions.create(
-                    model=_GROQ_MODEL,
+                    model=groq_model,
                     messages=messages,
                     max_tokens=max_tokens,
                     temperature=temperature,
