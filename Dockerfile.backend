@@ -32,6 +32,6 @@ COPY . .
 # Create graph data directory (volume mount point for graph_store.pkl)
 RUN mkdir -p /app/graph_data
 
-EXPOSE 8001
+EXPOSE 8080
 
-CMD ["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "8080"]
